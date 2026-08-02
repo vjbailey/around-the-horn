@@ -1,0 +1,10 @@
+# Re-fetchable API and scan caches. api_cache is ~78MB of Chadwick register
+# shards and StatsAPI responses; pipeline/update_recent.py and build_spans.py
+# rebuild it on demand.
+data/api_cache/
+
+# Intermediate pipeline artifacts, derived from data/raw by the scripts.
+data/scan_cache.json
+data/candidates.json
+
+.DS_Store

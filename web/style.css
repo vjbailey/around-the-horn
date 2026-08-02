@@ -1,0 +1,851 @@
+/* Around the Horn — a daily teammate puzzle. Single column, mobile first. */
+
+:root {
+  /* The page is near-neutral -- only a whisper of green in the paper and the
+     ink -- so saturated grass reads as *meaning*, not decoration. Three
+     accents, three states: grass you found it, sky an assist helped, stitch
+     red the game revealed it. */
+  --bg: #f1f4ee;
+  --board-bg: #f7f9f5;
+  --fg: #16221a;
+  --muted: #616b60;
+  --line: #dbe0d6;
+  --card: #ffffff;
+  --self: #1f7540;
+  --self-bg: #d2ead8;
+  --assist: #2c6c92;
+  --assist-bg: #d5e6f0;
+  --anchor: #16221a;
+  --anchor-bg: #e4e7de;
+  --bad: #b0392c;
+  --bad-bg: #f6dcd7;
+  --shadow: 22 34 26;
+  /* One elevation ramp and one motion vocabulary, so nothing is ad hoc. */
+  --e1: 0 1px 1px rgb(var(--shadow) / 0.05), 0 2px 6px rgb(var(--shadow) / 0.05);
+  --e2: 0 2px 6px rgb(var(--shadow) / 0.08), 0 8px 20px rgb(var(--shadow) / 0.08);
+  --e3: 0 8px 24px rgb(var(--shadow) / 0.14), 0 24px 60px rgb(var(--shadow) / 0.16);
+  --ease: cubic-bezier(0.2, 0.9, 0.3, 1);
+  --ease-out: cubic-bezier(0.35, 0, 0.5, 1);
+  --dur-1: 180ms; --dur-2: 320ms; --dur-3: 520ms;
+  /* 4px rhythm, so spacing stops being ad hoc */
+  --s1: 0.25rem; --s2: 0.5rem; --s3: 0.75rem;
+  --s4: 1rem;    --s5: 1.5rem; --s6: 2rem;
+  --radius: 12px;
+  --w: 30rem;
+  /* Three faces, three jobs. Names get a serif because they are the subject of
+     the game and deserve to look like names rather than interface labels; the
+     chrome stays in system sans so it recedes; anything that has to line up in
+     a column is mono. All three are system faces -- no downloads, no FOUT. */
+  --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype",
+                  Palatino, serif;
+  --font-num: ui-monospace, SFMono-Regular, Menlo, "Courier New", monospace;
+
+  /* Modular scale, 1.18 ratio off a 16px base. */
+  --t-xs: 0.7rem;    --t-sm: 0.82rem;  --t-md: 1rem;
+  --t-lg: 1.15rem;   --t-xl: 1.4rem;   --t-2xl: 1.65rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161916;
+    --board-bg: #1b1f1b;
+    --fg: #e9ece7;
+    --muted: #949c93;
+    --line: #2e332e;
+    --card: #1f231f;
+    --self: #6fd192;
+    --self-bg: #18321f;
+    --assist: #79b9dd;
+    --assist-bg: #1a2c37;
+    --anchor: #e9ece7;
+    --anchor-bg: #282d28;
+    --bad: #e5837a;
+    --bad-bg: #33211f;
+    --shadow: 0 0 0;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 var(--s4) 4rem;
+  background: var(--bg);
+  background-image: radial-gradient(
+    130% 70% at 50% -8%, rgb(255 255 255 / 0.85), transparent 62%);
+  background-attachment: fixed;
+  color: var(--fg);
+  font: 16px/1.55 var(--font-ui);
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+header, main { max-width: var(--w); margin: 0 auto; }
+
+header {
+  padding: 1.35rem 0 0.9rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--s5);
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.head-actions { flex: none; }
+
+h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-xl);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+h1 span {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: var(--font-ui);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.head-actions { display: flex; gap: 0.35rem; }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--fg);
+  padding: 0.45rem 1rem;
+  transition: background var(--dur-1), border-color var(--dur-1);
+}
+button:hover { border-color: var(--muted); }
+button:active { transform: translateY(1px); }
+@media (prefers-reduced-motion: reduce) { button:active { transform: none; } }
+.suggestions li:hover { background: var(--anchor-bg); }
+
+button.icon {
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+button.icon:hover { color: var(--fg); }
+button.icon[hidden] { display: none; }
+button.icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;   /* tuned for the 24-unit grid */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+button.primary {
+  width: 100%;
+  margin-top: 1.25rem;
+  background: var(--self);
+  border-color: var(--self);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.7rem;
+}
+
+
+.meta { margin: 0.4rem 0 0; color: var(--muted); font-size: var(--t-sm); }
+
+/* Live gauge of how many shortest chains are still open. Flashes on change,
+   tinted by whether the field narrowed or opened up. */
+.routes {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--muted);
+  transition: color var(--dur-2), border-color var(--dur-2),
+              transform var(--dur-1) var(--ease);
+}
+.routes[hidden] { display: none; }
+.routes.changed { transform: scale(1.12); }
+.routes.narrowed { color: var(--bad); border-color: var(--bad); }
+.routes.widened { color: var(--self); border-color: var(--self); }
+@media (prefers-reduced-motion: reduce) { .routes.changed { transform: none; } }
+
+/* ---- board ---- */
+
+.board {
+  --gutter: 2.75rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--board-bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: var(--s5) var(--s4) var(--s5) var(--gutter);
+}
+
+/* The spine runs behind the node rows as well as between them, or it would
+   break for the full height of every card. It starts at the first dot and
+   stops at the last, rather than overshooting both ends. */
+.node::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: calc(var(--gutter) / -2);
+  width: 2px;
+  margin-left: -1px;
+  background: var(--line);
+}
+.node.start::before { top: 50%; }
+.node.target::before { bottom: 50%; }
+
+/* A dot on the spine for every name, coloured by how that name got there. */
+.node::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--gutter) / -2);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line);
+  box-shadow: 0 0 0 3px var(--board-bg);
+}
+.node.start::after, .node.target::after { background: var(--fg); }
+.node.self::after { background: var(--self); }
+.node.assisted::after { background: var(--assist); }
+.node.revealed::after { background: var(--bad); }
+.node.target.unreached::after {
+  background: var(--board-bg);
+  box-shadow: inset 0 0 0 2px var(--line), 0 0 0 3px var(--board-bg);
+}
+
+.node {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  box-shadow: var(--e1);
+}
+@media (prefers-color-scheme: dark) {
+  body { background-image: radial-gradient(
+    130% 70% at 50% -8%, rgb(255 255 255 / 0.05), transparent 62%); }
+  .node { box-shadow: var(--e1); }
+}
+.node-line { display: flex; align-items: baseline; gap: 0.6rem; }
+
+/* The two anchors are opposites, so they must not look alike: you are standing
+   on the start, and the target is somewhere you have not got to yet. */
+.node-role {
+  font-size: var(--t-xs);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Endpoints are set bold, the links you supply regular: the two anchors are
+   givens, your names are the answer. */
+.node-name {
+  font-family: var(--font-display);
+  font-size: var(--t-lg);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.node.start .node-name, .node.target .node-name { font-weight: 700; }
+.node-years {
+  color: var(--muted);
+  font-size: var(--t-xs);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.node.start, .node.target {
+  background: var(--anchor-bg);
+  border-color: transparent;
+}
+/* unreached: outlined and hollow, so it reads as a destination not a fact */
+.node.target.unreached {
+  background: transparent;
+  border: 2px dashed var(--line);
+}
+.node.start .node-role, .node.target .node-role { color: var(--assist); }
+
+/* State is carried by the dot on the spine and a hairline border, never by a
+   fill: a pastel wash reads as highlighting, and three at once would compete
+   with the green that is deliberately reserved for meaning. Anchors stay
+   filled, because they are givens rather than states. */
+.node.self { border-color: var(--self); }
+.node.assisted { border-color: var(--assist); }
+.node.revealed { border-color: var(--bad); }
+
+.tag {
+  margin-left: auto;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: var(--assist);
+  font-weight: 700;
+}
+.tag.assist { color: var(--assist); }
+.tag.bad { color: var(--bad); }
+
+/* ---- links ----
+   A single rule runs the height of the gap and the label sits on top of it,
+   punched out with the page background. The connection reads as continuous
+   line rather than a caption under a tick mark. */
+.link {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0.9rem 0;
+}
+.link::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: calc(var(--gutter) / -2);
+  width: 2px;
+  margin-left: -1px;
+  background: var(--line);
+  transform-origin: top center;
+}
+
+/* Connections are secondary to names: no border, no fill, just quiet text,
+   aligned to the same axis as everything else. */
+.link-label {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  text-align: left;
+}
+.chip { display: inline-flex; align-items: baseline; gap: 0.4rem; }
+.chip-team { font-weight: 600; color: var(--fg); letter-spacing: -0.005em; }
+.chip-years {
+  color: var(--muted);
+  font-size: var(--t-xs);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.link-sep { color: var(--line); }
+
+/* ---- the gap ----
+   This is the subject of the screen. Previously it was tinted at the border
+   colour, i.e. 1.4:1 against the page — the least visible thing on it. */
+.link.gap { padding: 1.15rem 0; min-height: 3.6rem; align-items: center; }
+/* No rule across the gap: the connection has not been made yet, so the spine
+   genuinely stops here and picks up again at the target. The marker is the
+   only thing on the axis. */
+.link.gap::before { background: none; }
+.gap-hint {
+  padding-left: var(--s1);
+  font-size: var(--t-sm);
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.link.gap .gap-marker { animation: breathe 2.8s ease-in-out infinite; }
+.gap-marker {
+  position: absolute;
+  left: calc(var(--gutter) / -2);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  border: 2px solid var(--fg);
+  background: var(--board-bg);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--fg);
+  box-shadow: var(--e1);
+}
+
+/* The closing link -- green if you found it, red if you gave up and the game
+   had to close the chain for you. */
+.link.closed::before { background: var(--self); width: 3px; margin-left: -1.5px; }
+.link.closed .chip-team { color: var(--self); }
+.link.closed .chip-years { color: var(--self); opacity: 0.85; }
+
+.link.revealed::before { background: var(--bad); width: 3px; margin-left: -1.5px; }
+.link.revealed .chip-team { color: var(--bad); }
+.link.revealed .chip-years { color: var(--bad); opacity: 0.85; }
+
+.rc-link.closed {
+  border-left-color: var(--self);
+  color: var(--self);
+  font-weight: 600;
+}
+.rc-link.revealed {
+  border-left-color: var(--bad);
+  color: var(--bad);
+  font-weight: 600;
+}
+
+/* ---- dev: random-puzzle mode ---- */
+.test-flag { display: none; }
+body.testing .test-flag {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--assist-bg);
+  color: var(--assist);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---- link-added interaction ----
+   Staggered: the line draws downward, the club chip pops in on it, then the
+   new name lands. Only the freshly added link carries .enter. */
+
+@keyframes line-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes chip-in {
+  0%   { opacity: 0; transform: translateY(-5px) scale(0.85); }
+  70%  { opacity: 1; transform: translateY(0) scale(1.04); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes node-in {
+  0%   { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes landed {
+  0%   { transform: none; }
+  45%  { transform: scale(1.035); }
+  100% { transform: none; }
+}
+
+.link.enter::before { animation: line-draw 200ms ease-out both; }
+.link.enter .link-label { animation: chip-in 320ms cubic-bezier(.2,.9,.3,1) 160ms both; }
+.node.landed { animation: landed 520ms ease-out 320ms both; }
+
+/* Completing a link should feel like something happened: the node lands, then
+   a coloured ring breaks out of it in whichever colour that link earned. */
+@keyframes ring {
+  from { box-shadow: 0 0 0 0 var(--ring-from); }
+  to   { box-shadow: 0 0 0 16px transparent; }
+}
+@keyframes breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(-50%, -50%) scale(1.07); }
+}
+@keyframes caught {
+  0%, 100% { transform: none; box-shadow: none; }
+  35%      { transform: scale(1.045); box-shadow: 0 7px 20px rgb(0 0 0 / 0.14); }
+}
+@keyframes fanfare-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to   { opacity: 1; transform: none; }
+}
+
+.node.self     { --ring-from: rgb(31 117 64 / 0.50); }
+.node.assisted { --ring-from: rgb(44 108 146 / 0.45); }
+.node.revealed { --ring-from: rgb(176 57 44 / 0.40); }
+@media (prefers-color-scheme: dark) {
+  .node.self     { --ring-from: rgb(111 209 146 / 0.45); }
+  .node.assisted { --ring-from: rgb(121 185 221 / 0.40); }
+  .node.revealed { --ring-from: rgb(229 131 122 / 0.35); }
+}
+
+.node.enter {
+  animation: node-in 330ms cubic-bezier(.2,.9,.3,1) 220ms both,
+             ring 620ms ease-out 300ms both;
+}
+
+/* On a clean solve the whole chain ripples top to bottom. */
+/* The ball relayed down the finished chain, and the pop as each name catches. */
+.ball {
+  position: absolute;
+  left: calc(var(--gutter) / 2);
+  top: 0;
+  font-size: 1.35rem;
+  line-height: 1;
+  z-index: 4;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 3px 5px rgb(0 0 0 / 0.3));
+}
+.node.caught { animation: caught 400ms ease-out both; }
+
+/* The headline lands on the board before the sheet covers it. */
+.fanfare {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 1.15rem auto 0;
+  max-width: var(--w);
+  animation: fanfare-in 480ms cubic-bezier(.2,.9,.3,1) both;
+}
+.fanfare[hidden] { display: none; }
+/* Reconciled with the rest of the page: a panel in the app's own materials,
+   with the figures carrying the weight rather than a dark slab doing it. */
+.score-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+.scoreboard {
+  display: flex;
+  gap: 0;
+  padding: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--e1);
+  overflow: hidden;
+}
+.sb-cell {
+  min-width: 5.4rem;
+  padding: 0.6rem 0.9rem 0.65rem;
+  background: transparent;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+.sb-label {
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: var(--muted);
+}
+.sb-val {
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-family: var(--font-num);
+}
+.sb-cell:last-child { border-right: none; }
+.score-wrap .sb-cell:first-child .sb-val { color: var(--self); }
+.score-wrap.revealed .sb-cell:first-child .sb-val { color: var(--bad); }
+
+.sb-verdict {
+  margin-top: 0.7rem;
+  font-family: var(--font-display);
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--self);
+}
+.score-wrap.revealed .sb-verdict { color: var(--bad); }
+.see-how {
+  width: auto;
+  margin-top: 0.9rem;
+  padding: 0.55rem 1.5rem;
+  font-size: 0.9rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fanfare,
+  .link.gap .gap-marker,
+  .node.caught,
+  .link.enter::before,
+  .link.enter .link-label,
+  .node.enter,
+  .node.landed { animation: none; }
+}
+
+
+/* ---- controls ---- */
+
+.controls { margin-top: var(--s5); }
+
+.input-wrap { position: relative; }
+
+input {
+  width: 100%;
+  font: inherit;
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--fg);
+}
+input:focus {
+  outline: 2px solid var(--self);
+  outline-offset: 1px;
+  border-color: var(--self);
+}
+
+.suggestions {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0.25rem;
+  position: absolute;
+  z-index: 5;
+  left: 0; right: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--e2);
+  max-height: 17rem;
+  overflow-y: auto;
+}
+.suggestions li {
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+.suggestions li.active { background: var(--anchor-bg); }
+.sug-name { font-family: var(--font-display); font-size: var(--t-md); }
+.sug-meta {
+  color: var(--muted);
+  font-size: var(--t-xs);
+  font-family: var(--font-num);
+  white-space: nowrap;
+}
+
+/* One selection mechanism: everything happens in this bar. The assist control
+   sits inside it because all an assist does is change what the bar offers. */
+.bar { position: relative; display: flex; align-items: center; }
+.bar input { padding-right: 3.4rem; }
+
+.bar-assist {
+  position: absolute;
+  right: 0.35rem;
+  height: 2.1rem;
+  min-width: 2.1rem;
+  padding: 0 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--anchor-bg);
+  border-color: transparent;
+  font-size: 0.85rem;
+}
+.bar-assist:disabled { opacity: 0.4; cursor: default; }
+.bar-assist .bulb { font-size: 0.95rem; line-height: 1; }
+#assist-count { font-size: 0.72rem; font-weight: 700; color: var(--assist); }
+
+/* The active filter, shown as a removable token under the bar. */
+.scope {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+  padding: 0.3rem 0.4rem 0.3rem 0.7rem;
+  border: 1px dashed var(--assist);
+  background: var(--assist-bg);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--assist);
+  width: fit-content;
+}
+.scope[hidden] { display: none; }
+#scope-clear {
+  border: none;
+  background: none;
+  color: var(--assist);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 0.3rem;
+}
+
+/* Names the assist surfaced, as opposed to anything else you type. */
+.suggestions li.scoped { background: var(--assist-bg); }
+.suggestions li.scoped.active { background: var(--anchor-bg); }
+.sug-pos {
+  margin-left: 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Terminal and irreversible, so it should not look like a peer of Hint. */
+.linklike {
+  display: block;
+  margin: 0.85rem auto 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.linklike:hover { color: var(--fg); }
+
+:focus-visible { outline: 2px solid var(--self); outline-offset: 2px; border-radius: 6px; }
+
+.message { min-height: 1.4rem; font-size: var(--t-sm); margin-bottom: var(--s2); }
+.message.bad { color: var(--bad); }
+.message.good { color: var(--self); }
+
+.empty { text-align: center; color: var(--muted); padding: 3rem 1rem; }
+
+/* ---- overlays ---- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.45);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 20;
+}
+.overlay[hidden] { display: none; }
+
+.sheet {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: var(--s5) var(--s4) var(--s4);
+  width: min(var(--w), 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--e3);
+}
+
+.close {
+  position: absolute;
+  top: 0.6rem; right: 0.6rem;
+  border: none;
+  background: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--muted);
+  padding: 0.2rem 0.5rem;
+}
+
+.result-chain {
+  margin-bottom: var(--s4);
+  padding-bottom: var(--s4);
+  border-bottom: 1px solid var(--line);
+}
+.rc-node {
+  padding: 0.45rem 0.7rem;
+  border-radius: 9px;
+  background: var(--anchor-bg);
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+.rc-node.self { background: var(--self-bg); }
+.rc-name { font-family: var(--font-display); font-size: var(--t-md); font-weight: 600; }
+.rc-link {
+  font-size: 0.72rem;
+  color: var(--muted);
+  padding: 0.2rem 0 0.2rem 0.7rem;
+  border-left: 2px solid var(--line);
+  margin-left: 0.7rem;
+}
+
+.dist h3 {
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 0 0 var(--s2);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+}
+.dist h3:first-child { padding-top: 0; border-top: none; }
+.hist-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+.hist-k { width: 1.6rem; font-size: 0.8rem; color: var(--muted);
+          font-variant-numeric: tabular-nums; text-align: right; }
+/* The count sits beside the bar, not inside it: a 2%-wide bar cannot hold a
+   number without overflowing its own background. */
+.hist-track { flex: 1; display: flex; align-items: center; gap: 0.4rem; }
+.hist-bar {
+  background: var(--line);
+  border-radius: 4px;
+  height: 0.85rem;
+  min-width: 2px;
+}
+.hist-n { font-size: 0.7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hist-row.mine .hist-bar { background: var(--self); }
+.hist-row.mine .hist-k, .hist-row.mine .hist-n { color: var(--self); font-weight: 700; }
+.dist h3 + .hist { margin-bottom: var(--s1); }
+.pct.sim { font-style: italic; opacity: 0.75; }
+
+.result-actions {
+  display: flex;
+  gap: var(--s2);
+  margin-top: var(--s4);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+}
+.ghost-btn { flex: 1; font-size: 0.85rem; padding: 0.55rem 0.7rem; }
+.ss-box { margin-top: 0.9rem; }
+
+/* A shortest route, shown after the fact. Quieter than the player's own chain
+   above it -- it is a footnote about the puzzle, not a second scoreboard. */
+.ss-chain {
+  border-left: 2px solid var(--line);
+  padding-left: 0.75rem;
+  margin: 0.4rem 0 0.5rem;
+}
+.ss-name { font-family: var(--font-display); font-size: var(--t-md); font-weight: 400; }
+.ss-link {
+  font-size: 0.7rem;
+  color: var(--muted);
+  padding: 0.12rem 0;
+  font-variant-numeric: tabular-nums;
+}
+.pct { font-size: var(--t-sm); color: var(--muted); margin: var(--s2) 0 0; }
+.dist-pending { color: var(--muted); font-size: 0.85rem; }
+
+.sheet h2 {
+  margin-top: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.sheet p, .sheet li { text-wrap: pretty; }
+.sheet ul { padding-left: 1.1rem; }
+.sheet li { margin-bottom: 0.4rem; }
+.fine { color: var(--muted); font-size: 0.85rem; }
+
+@media (min-width: 34rem) {
+  body { padding-top: 0.5rem; }
+  h1 { font-size: var(--t-2xl); }
+}

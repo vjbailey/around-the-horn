@@ -1,0 +1,151 @@
+yearID,teamID,lgID,franchID,name
+2022,OAK,AL,OAK,Oakland Athletics
+2022,PIT,NL,PIT,Pittsburgh Pirates
+2022,SDN,NL,SDN,San Diego Padres
+2022,SEA,AL,SEA,Seattle Mariners
+2022,SFN,NL,SFN,San Francisco Giants
+2022,SLN,NL,SLN,St. Louis Cardinals
+2022,TBA,AL,TBA,Tampa Bay Rays
+2022,TEX,AL,TEX,Texas Rangers
+2022,TOR,AL,TOR,Toronto Blue Jays
+2022,MIN,AL,MIN,Minnesota Twins
+2022,PHI,NL,PHI,Philadelphia Phillies
+2022,ATL,NL,ATL,Atlanta Braves
+2022,CHA,AL,CHA,Chicago White Sox
+2022,MIA,NL,MIA,Miami Marlins
+2022,NYA,AL,NYA,New York Yankees
+2022,MIL,NL,MIL,Milwaukee Brewers
+2022,ANA,AL,ANA,Los Angeles Angels
+2022,ARI,NL,ARI,Arizona Diamondbacks
+2022,BAL,AL,BAL,Baltimore Orioles
+2022,BOS,AL,BOS,Boston Red Sox
+2022,CHN,NL,CHN,Chicago Cubs
+2022,CIN,NL,CIN,Cincinnati Reds
+2022,CLE,AL,CLE,Cleveland Guardians
+2022,COL,NL,COL,Colorado Rockies
+2022,DET,AL,DET,Detroit Tigers
+2022,HOU,AL,HOU,Houston Astros
+2022,KCA,AL,KCA,Kansas City Royals
+2022,LAN,NL,LAN,Los Angeles Dodgers
+2022,WAS,NL,WAS,Washington Nationals
+2022,NYN,NL,NYN,New York Mets
+2023,OAK,AL,OAK,Oakland Athletics
+2023,PIT,NL,PIT,Pittsburgh Pirates
+2023,SDN,NL,SDN,San Diego Padres
+2023,SEA,AL,SEA,Seattle Mariners
+2023,SFN,NL,SFN,San Francisco Giants
+2023,SLN,NL,SLN,St. Louis Cardinals
+2023,TBA,AL,TBA,Tampa Bay Rays
+2023,TEX,AL,TEX,Texas Rangers
+2023,TOR,AL,TOR,Toronto Blue Jays
+2023,MIN,AL,MIN,Minnesota Twins
+2023,PHI,NL,PHI,Philadelphia Phillies
+2023,ATL,NL,ATL,Atlanta Braves
+2023,CHA,AL,CHA,Chicago White Sox
+2023,MIA,NL,MIA,Miami Marlins
+2023,NYA,AL,NYA,New York Yankees
+2023,MIL,NL,MIL,Milwaukee Brewers
+2023,ANA,AL,ANA,Los Angeles Angels
+2023,ARI,NL,ARI,Arizona Diamondbacks
+2023,BAL,AL,BAL,Baltimore Orioles
+2023,BOS,AL,BOS,Boston Red Sox
+2023,CHN,NL,CHN,Chicago Cubs
+2023,CIN,NL,CIN,Cincinnati Reds
+2023,CLE,AL,CLE,Cleveland Guardians
+2023,COL,NL,COL,Colorado Rockies
+2023,DET,AL,DET,Detroit Tigers
+2023,HOU,AL,HOU,Houston Astros
+2023,KCA,AL,KCA,Kansas City Royals
+2023,LAN,NL,LAN,Los Angeles Dodgers
+2023,WAS,NL,WAS,Washington Nationals
+2023,NYN,NL,NYN,New York Mets
+2024,OAK,AL,OAK,Oakland Athletics
+2024,PIT,NL,PIT,Pittsburgh Pirates
+2024,SDN,NL,SDN,San Diego Padres
+2024,SEA,AL,SEA,Seattle Mariners
+2024,SFN,NL,SFN,San Francisco Giants
+2024,SLN,NL,SLN,St. Louis Cardinals
+2024,TBA,AL,TBA,Tampa Bay Rays
+2024,TEX,AL,TEX,Texas Rangers
+2024,TOR,AL,TOR,Toronto Blue Jays
+2024,MIN,AL,MIN,Minnesota Twins
+2024,PHI,NL,PHI,Philadelphia Phillies
+2024,ATL,NL,ATL,Atlanta Braves
+2024,CHA,AL,CHA,Chicago White Sox
+2024,MIA,NL,MIA,Miami Marlins
+2024,NYA,AL,NYA,New York Yankees
+2024,MIL,NL,MIL,Milwaukee Brewers
+2024,ANA,AL,ANA,Los Angeles Angels
+2024,ARI,NL,ARI,Arizona Diamondbacks
+2024,BAL,AL,BAL,Baltimore Orioles
+2024,BOS,AL,BOS,Boston Red Sox
+2024,CHN,NL,CHN,Chicago Cubs
+2024,CIN,NL,CIN,Cincinnati Reds
+2024,CLE,AL,CLE,Cleveland Guardians
+2024,COL,NL,COL,Colorado Rockies
+2024,DET,AL,DET,Detroit Tigers
+2024,HOU,AL,HOU,Houston Astros
+2024,KCA,AL,KCA,Kansas City Royals
+2024,LAN,NL,LAN,Los Angeles Dodgers
+2024,WAS,NL,WAS,Washington Nationals
+2024,NYN,NL,NYN,New York Mets
+2025,OAK,AL,OAK,Athletics
+2025,PIT,NL,PIT,Pittsburgh Pirates
+2025,SDN,NL,SDN,San Diego Padres
+2025,SEA,AL,SEA,Seattle Mariners
+2025,SFN,NL,SFN,San Francisco Giants
+2025,SLN,NL,SLN,St. Louis Cardinals
+2025,TBA,AL,TBA,Tampa Bay Rays
+2025,TEX,AL,TEX,Texas Rangers
+2025,TOR,AL,TOR,Toronto Blue Jays
+2025,MIN,AL,MIN,Minnesota Twins
+2025,PHI,NL,PHI,Philadelphia Phillies
+2025,ATL,NL,ATL,Atlanta Braves
+2025,CHA,AL,CHA,Chicago White Sox
+2025,MIA,NL,MIA,Miami Marlins
+2025,NYA,AL,NYA,New York Yankees
+2025,MIL,NL,MIL,Milwaukee Brewers
+2025,ANA,AL,ANA,Los Angeles Angels
+2025,ARI,NL,ARI,Arizona Diamondbacks
+2025,BAL,AL,BAL,Baltimore Orioles
+2025,BOS,AL,BOS,Boston Red Sox
+2025,CHN,NL,CHN,Chicago Cubs
+2025,CIN,NL,CIN,Cincinnati Reds
+2025,CLE,AL,CLE,Cleveland Guardians
+2025,COL,NL,COL,Colorado Rockies
+2025,DET,AL,DET,Detroit Tigers
+2025,HOU,AL,HOU,Houston Astros
+2025,KCA,AL,KCA,Kansas City Royals
+2025,LAN,NL,LAN,Los Angeles Dodgers
+2025,WAS,NL,WAS,Washington Nationals
+2025,NYN,NL,NYN,New York Mets
+2026,OAK,AL,OAK,Athletics
+2026,PIT,NL,PIT,Pittsburgh Pirates
+2026,SDN,NL,SDN,San Diego Padres
+2026,SEA,AL,SEA,Seattle Mariners
+2026,SFN,NL,SFN,San Francisco Giants
+2026,SLN,NL,SLN,St. Louis Cardinals
+2026,TBA,AL,TBA,Tampa Bay Rays
+2026,TEX,AL,TEX,Texas Rangers
+2026,TOR,AL,TOR,Toronto Blue Jays
+2026,MIN,AL,MIN,Minnesota Twins
+2026,PHI,NL,PHI,Philadelphia Phillies
+2026,ATL,NL,ATL,Atlanta Braves
+2026,CHA,AL,CHA,Chicago White Sox
+2026,MIA,NL,MIA,Miami Marlins
+2026,NYA,AL,NYA,New York Yankees
+2026,MIL,NL,MIL,Milwaukee Brewers
+2026,ANA,AL,ANA,Los Angeles Angels
+2026,ARI,NL,ARI,Arizona Diamondbacks
+2026,BAL,AL,BAL,Baltimore Orioles
+2026,BOS,AL,BOS,Boston Red Sox
+2026,CHN,NL,CHN,Chicago Cubs
+2026,CIN,NL,CIN,Cincinnati Reds
+2026,CLE,AL,CLE,Cleveland Guardians
+2026,COL,NL,COL,Colorado Rockies
+2026,DET,AL,DET,Detroit Tigers
+2026,HOU,AL,HOU,Houston Astros
+2026,KCA,AL,KCA,Kansas City Royals
+2026,LAN,NL,LAN,Los Angeles Dodgers
+2026,WAS,NL,WAS,Washington Nationals
+2026,NYN,NL,NYN,New York Mets

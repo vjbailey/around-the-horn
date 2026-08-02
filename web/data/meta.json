@@ -1,0 +1,10 @@
+{
+  "source": "chadwickbureau/baseballdatabank @ xorq-labs mirror (2021 databank)",
+  "players": 21407,
+  "teamSeasons": 3135,
+  "stints": 118458,
+  "yearRange": [
+    1871,
+    2026
+  ]
+}
