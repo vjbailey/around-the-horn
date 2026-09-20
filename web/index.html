@@ -14,7 +14,7 @@
   <div class="title-row">
     <h1>Around the Horn <span>daily baseball chaining puzzle</span></h1>
     <div class="head-actions">
-      <button id="new-btn" class="icon" title="Random puzzle (testing)" aria-label="Random puzzle"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
+      <button id="new-btn" class="icon" title="Practice puzzle" aria-label="Practice puzzle"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
       <button id="show-results" class="icon" title="Today's result" aria-label="Today's result"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></button>
       <button id="help-btn" class="icon" title="How to play" aria-label="How to play"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.1 9.3a3 3 0 0 1 5.8 1c0 2-2.9 2.6-2.9 4"/><line x1="12" y1="17.4" x2="12.01" y2="17.4"/></svg></button>
     </div>
@@ -22,8 +22,9 @@
   <p class="meta">
     <span id="puzzle-no"></span> · <span id="puzzle-date"></span>
     <span id="routes" class="routes" hidden></span>
-    <span id="test-flag" class="test-flag">test puzzle — not saved</span>
+    <span id="test-flag" class="test-flag">practice — not saved</span>
   </p>
+  <button id="back-daily" class="linklike back-daily" hidden>← Back to today's puzzle</button>
 </header>
 
 <main>
@@ -59,6 +60,41 @@
   <div class="sheet">
     <button id="results-close" class="close" aria-label="Close">×</button>
     <div id="results-body"></div>
+  </div>
+</div>
+
+<div id="practice" class="overlay" hidden>
+  <div class="sheet">
+    <button id="practice-close" class="close" aria-label="Close">×</button>
+    <h2>Practice puzzle</h2>
+    <p class="fine">As many as you like. These never affect today's result or
+       your streak.</p>
+
+    <label class="field" for="era-select">
+      <span class="field-label">Players from</span>
+      <select id="era-select">
+        <option value="0">Any era</option>
+        <option value="1980">1980 onwards</option>
+        <option value="1990">1990 onwards</option>
+        <option value="2000">2000 onwards</option>
+        <option value="2010" selected>2010 onwards</option>
+        <option value="2020">2020 onwards</option>
+      </select>
+      <span class="field-note" id="era-note"></span>
+    </label>
+
+    <label class="field" for="level-select">
+      <span class="field-label">Difficulty</span>
+      <select id="level-select">
+        <option value="any">Any</option>
+        <option value="easy">Easy — many ways through</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard — only a few routes</option>
+      </select>
+    </label>
+
+    <button id="deal-btn" class="primary">Deal a puzzle</button>
+    <p id="practice-msg" class="fine practice-msg" role="status" aria-live="polite"></p>
   </div>
 </div>
 

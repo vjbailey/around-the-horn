@@ -149,10 +149,16 @@ export class Engine {
     const MAX_MID_SPREAD = 12;
     const mid = i => (this.y0[i] + this.lastYear(i)) / 2;
 
+    // The pool is fame-sorted, so squaring the draw biases toward the famous
+    // end. Uniform sampling gives the pool's median, which is roughly half as
+    // recognizable as the daily bank -- the offline scheduler explicitly
+    // prefers famous pairs and practice should match it.
+    const pick = () => pool[(Math.random() ** 2.2 * pool.length) | 0];
+
     let best = null;
     for (let k = 0; k < tries; k++) {
-      const s = pool[(Math.random() * pool.length) | 0];
-      const t = pool[(Math.random() * pool.length) | 0];
+      const s = pick();
+      const t = pick();
       if (s === t) continue;
       if (Math.abs(mid(s) - mid(t)) > MAX_MID_SPREAD) continue;
       // careers must actually overlap, or no shared era exists to chain through

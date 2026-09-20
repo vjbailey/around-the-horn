@@ -561,7 +561,8 @@ async function showResults() {
   // shoved in front of someone who just solved it cleanly.
   const actions = el('div', 'result-actions');
   const showBtn = el('button', 'ghost-btn', 'Show a shortest solution');
-  const againBtn = el('button', 'ghost-btn', 'Play again');
+  const againBtn = el('button', 'ghost-btn',
+    game.puzzle.practice ? 'Another practice' : 'Play again');
   actions.appendChild(showBtn);
   actions.appendChild(againBtn);
   body.appendChild(actions);
@@ -579,9 +580,15 @@ async function showResults() {
     showBtn.textContent = 'Hide the solution';
   });
   againBtn.addEventListener('click', () => {
+    if (game.puzzle.practice) { openPractice(); return; }
     $('results').hidden = true;
     startPuzzle(game.puzzle.date, 'replay');
   });
+  if (!game.puzzle.practice) {
+    const practiceBtn = el('button', 'ghost-btn', 'Practice puzzle');
+    practiceBtn.addEventListener('click', openPractice);
+    actions.appendChild(practiceBtn);
+  }
 
   const share = el('button', 'primary', 'Share');
   share.addEventListener('click', async () => {
@@ -610,9 +617,9 @@ function restore(saved) {
  * one again) plays without touching saved progress -- the day's real result
  * is already locked in and must not be overwritten by a practice run.
  */
-function startPuzzle(date, mode = null) {
+function startPuzzle(date, mode = null, generated = null) {
   const test = mode !== null;
-  const puzzle = game.engine.puzzleFor(date);
+  const puzzle = generated || game.engine.puzzleFor(date);
   if (!puzzle) {
     $('board').replaceWith(el('p', 'empty',
       'No puzzle scheduled for today. The bank needs extending.'));
@@ -626,15 +633,18 @@ function startPuzzle(date, mode = null) {
     scope: null, lastRoutes: undefined,
   });
   $('routes').dataset.n = '';
-  $('puzzle-no').textContent = `Puzzle #${puzzle.n}`;
-  $('puzzle-date').textContent = mode === 'test'
-    ? `${puzzle.band.toUpperCase()} · ${puzzle.era}`
+  const LEVEL_NAME = { mon: 'Very easy', tue: 'Easy', wed: 'Easy', thu: 'Medium',
+                       fri: 'Medium', sat: 'Tricky', sun: 'Hard' };
+  $('puzzle-no').textContent = puzzle.practice ? 'Practice' : `Puzzle #${puzzle.n}`;
+  $('puzzle-date').textContent = puzzle.practice
+    ? `${LEVEL_NAME[puzzle.band] || 'Medium'} · ${puzzle.era}`
     : new Date(date + 'T12:00:00Z')
         .toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
   document.body.classList.toggle('testing', test);
+  $('back-daily').hidden = !test;
   if (test) {
     $('test-flag').textContent =
-      mode === 'replay' ? 'replay — not saved' : 'test puzzle — not saved';
+      mode === 'replay' ? 'replay — not saved' : 'practice — not saved';
   }
 
   const saved = test ? null : dayResult(game.state, date);
@@ -647,12 +657,66 @@ function startPuzzle(date, mode = null) {
   return true;
 }
 
-/** Dev affordance: jump to a random puzzle from the bank. */
-function randomPuzzle() {
-  const dates = Object.keys(game.engine.puzzles);
-  const pick = dates[Math.floor(Math.random() * dates.length)];
+// Practice puzzles are generated on demand, never drawn from the schedule:
+// pulling them from future dates would spoil upcoming dailies, and there are
+// only 730 of those.
+const LEVELS = {
+  any:    { minRoutes: 4,  maxRoutes: Infinity },
+  easy:   { minRoutes: 25, maxRoutes: Infinity },
+  medium: { minRoutes: 8,  maxRoutes: 24 },
+  hard:   { minRoutes: 4,  maxRoutes: 7 },
+};
+
+function practicePrefs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('sdob.practice')) || {};
+    return { minYear: saved.minYear ?? 2010, level: saved.level ?? 'medium' };
+  } catch {
+    return { minYear: 2010, level: 'medium' };
+  }
+}
+
+function updateEraNote() {
+  const n = game.engine.poolSince(Number($('era-select').value)).length;
+  $('era-note').textContent = `${n.toLocaleString()} well-known players eligible`;
+}
+
+function openPractice() {
+  const { minYear, level } = practicePrefs();
+  $('era-select').value = String(minYear);
+  $('level-select').value = level;
+  $('practice-msg').textContent = '';
+  updateEraNote();
   $('results').hidden = true;
-  startPuzzle(pick, 'test');
+  $('practice').hidden = false;
+  $('deal-btn').focus({ preventScroll: true });
+}
+
+async function dealPractice() {
+  const minYear = Number($('era-select').value);
+  const level = $('level-select').value;
+  try {
+    localStorage.setItem('sdob.practice', JSON.stringify({ minYear, level }));
+  } catch { /* private mode */ }
+
+  const btn = $('deal-btn');
+  btn.disabled = true;
+  btn.textContent = 'Dealing…';
+  $('practice-msg').textContent = '';
+  // Yield a frame so the button repaints: a hard puzzle in a dense era can
+  // take most of a second to find, and a frozen button reads as a broken one.
+  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+
+  const puzzle = game.engine.makePuzzle({ minYear, ...LEVELS[level] });
+  btn.disabled = false;
+  btn.textContent = 'Deal a puzzle';
+  if (!puzzle) {
+    $('practice-msg').textContent =
+      'Could not find one with those settings — try a wider era or an easier level.';
+    return;
+  }
+  $('practice').hidden = true;
+  startPuzzle(null, 'practice', puzzle);
 }
 
 async function boot() {
@@ -690,10 +754,14 @@ async function boot() {
     saveState(game.state);
   });
   $('show-results').addEventListener('click', () => { if (game.solved) showResults(); });
-  // Random-puzzle jumping is a local development affordance, not a feature.
-  const isLocal = ['localhost', '127.0.0.1', '[::1]', ''].includes(location.hostname);
-  $('new-btn').hidden = !isLocal;
-  if (isLocal) $('new-btn').addEventListener('click', randomPuzzle);
+  $('new-btn').addEventListener('click', openPractice);
+  $('practice-close').addEventListener('click', () => { $('practice').hidden = true; });
+  $('deal-btn').addEventListener('click', dealPractice);
+  $('era-select').addEventListener('change', updateEraNote);
+  $('back-daily').addEventListener('click', () => {
+    $('results').hidden = true;
+    startPuzzle(puzzleDate());
+  });
   $('scope-clear').addEventListener('click', () => { clearScope(); $('guess').focus(); });
 
   if (!game.state.seenHowTo) $('howto').hidden = false;
