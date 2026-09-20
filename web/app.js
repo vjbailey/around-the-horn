@@ -430,7 +430,12 @@ function showFanfare() {
   box.className = 'fanfare';
   box.innerHTML = '';
   const go = el('button', 'primary see-how', 'See how you did');
-  go.addEventListener('click', showResults);
+  go.addEventListener('click', () => {
+    showResults().catch((err) => {
+      console.error(err);
+      say('Could not open the results.', 'bad');
+    });
+  });
   box.appendChild(go);
   box.hidden = false;
   go.focus({ preventScroll: true });
@@ -619,7 +624,10 @@ function restore(saved) {
  */
 function startPuzzle(date, mode = null, generated = null) {
   const test = mode !== null;
-  const puzzle = generated || game.engine.puzzleFor(date);
+  // Generated puzzles are dated today so everything downstream -- the streak
+  // lookup, the result payload -- has a real date to work with.
+  const puzzle = generated ? { ...generated, date: date || puzzleDate() }
+                           : game.engine.puzzleFor(date);
   if (!puzzle) {
     $('board').replaceWith(el('p', 'empty',
       'No puzzle scheduled for today. The bank needs extending.'));
@@ -753,7 +761,9 @@ async function boot() {
     game.state.seenHowTo = true;
     saveState(game.state);
   });
-  $('show-results').addEventListener('click', () => { if (game.solved) showResults(); });
+  $('show-results').addEventListener('click', () => {
+    if (game.solved) showResults().catch(err => console.error(err));
+  });
   $('new-btn').addEventListener('click', openPractice);
   $('practice-close').addEventListener('click', () => { $('practice').hidden = true; });
   $('deal-btn').addEventListener('click', dealPractice);

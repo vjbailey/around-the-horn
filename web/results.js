@@ -48,6 +48,9 @@ export function recordResult(state, date, result) {
 
 /** Consecutive solved days ending today (or yesterday, if today is unplayed). */
 export function streak(state, today) {
+  // A malformed date used to throw out of here and take the whole results
+  // sheet with it; there is no streak worth that.
+  if (!today || Number.isNaN(Date.parse(today + 'T12:00:00Z'))) return 0;
   const day = (iso, delta) => {
     const d = new Date(iso + 'T12:00:00Z');
     d.setUTCDate(d.getUTCDate() + delta);
