@@ -59,6 +59,7 @@ export class Engine {
 
     this.buildReverseIndex();
     this.buildSearchIndex();
+    this.buildPools();
     return this;
   }
 
@@ -89,6 +90,94 @@ export class Engine {
     this._queue = new Int32Array(this.n);
     this._stamp = new Int32Array(this.n);
     this._epoch = 0;
+  }
+
+  /**
+   * Endpoint pools, ranked by fame *within each decade*.
+   *
+   * Ranking within an era rather than globally is what keeps active players
+   * eligible: fame accrues over a whole career, so a current star always sits
+   * mid-table against retired Hall of Famers no matter how well known they
+   * actually are. Mirrors ERA_POOL in the offline pipeline.
+   */
+  buildPools() {
+    const ERA_CAP = { 1980: 250, 1990: 300, 2000: 350, 2010: 400, 2020: 400 };
+    const byEra = new Map();
+    this.era = new Int32Array(this.n);
+    for (let i = 0; i < this.n; i++) {
+      const mid = (this.y0[i] + this.lastYear(i)) / 2;
+      const decade = Math.floor(mid / 10) * 10;
+      this.era[i] = decade;
+      if (!byEra.has(decade)) byEra.set(decade, []);
+      byEra.get(decade).push(i);
+    }
+    // eligible = inside its own decade's fame cap
+    this.eligible = new Uint8Array(this.n);
+    for (const [decade, members] of byEra) {
+      const cap = ERA_CAP[decade] ?? 200;
+      members.sort((a, b) => this.fame[b] - this.fame[a]);
+      for (let r = 0; r < Math.min(cap, members.length); r++) {
+        this.eligible[members[r]] = 1;
+      }
+    }
+    this.pool = [];
+    for (let i = 0; i < this.n; i++) if (this.eligible[i]) this.pool.push(i);
+    this.pool.sort((a, b) => this.fame[b] - this.fame[a]);
+  }
+
+  /** Endpoints active in or after `minYear`, most famous first. */
+  poolSince(minYear) {
+    return minYear <= 0 ? this.pool
+                        : this.pool.filter(i => this.lastYear(i) >= minYear);
+  }
+
+  /**
+   * Generate a fresh practice puzzle by rejection sampling.
+   *
+   * Deliberately not drawn from the scheduled bank: pulling from future dates
+   * would spoil upcoming dailies, and there are only 730 of them. Generating
+   * gives an unlimited supply and lets the era filter actually bite.
+   *
+   * Applies the same guardrails the offline pipeline does -- both endpoints
+   * recognizable for their era, careers of one generation, at least MIN_ROUTES
+   * ways through, and a well-known connector so it is humanly solvable.
+   */
+  makePuzzle({ minYear = 0, minRoutes = 4, maxRoutes = Infinity,
+               maxDist = 3, tries = 4000 } = {}) {
+    const pool = this.poolSince(minYear);
+    if (pool.length < 2) return null;
+    const MAX_MID_SPREAD = 12;
+    const mid = i => (this.y0[i] + this.lastYear(i)) / 2;
+
+    let best = null;
+    for (let k = 0; k < tries; k++) {
+      const s = pool[(Math.random() * pool.length) | 0];
+      const t = pool[(Math.random() * pool.length) | 0];
+      if (s === t) continue;
+      if (Math.abs(mid(s) - mid(t)) > MAX_MID_SPREAD) continue;
+      // careers must actually overlap, or no shared era exists to chain through
+      if (Math.min(this.lastYear(s), this.lastYear(t))
+          - Math.max(this.y0[s], this.y0[t]) < 0) continue;
+      if (this.areTeammates(s, t)) continue;        // too easy: no link needed
+
+      const { dist, routes } = this.routesFrom([s], t);
+      if (dist < 2 || dist > maxDist) continue;
+      if (routes < minRoutes || routes > maxRoutes) continue;
+
+      // the intended connector should be someone a fan could name
+      const via = this.nextStep([s], t);
+      if (via === null || this.fame[via] < 45) continue;
+
+      best = {
+        s, t, d: dist, chains: Math.round(routes),
+        band: routes >= 40 ? 'mon' : routes >= 25 ? 'tue' : routes >= 18 ? 'wed'
+            : routes >= 12 ? 'thu' : routes >= 8 ? 'fri' : routes >= 6 ? 'sat' : 'sun',
+        era: `${Math.floor((mid(s) + mid(t)) / 20) * 10}s`,
+        practice: true,
+      };
+      break;
+    }
+    return best;
   }
 
   /** Did two stints on the same club overlap in time? */
